@@ -17,11 +17,12 @@ sidvalue = soup.find('sid').text
 wlan_page = requests.get("http://fritz.box/?sid=" + sidvalue + "&lp=netDev")
 wlan_soup = BeautifulSoup(wlan_page.text, 'html.parser')
 print(wlan_soup.prettify())
-
 json_data=open(file_directory).read()
 
 data = json.loads(json_data)
 print(data)
+
+# This is a commit test
 
 #print(soup)
 #print(soup.prettify())
