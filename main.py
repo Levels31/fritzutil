@@ -5,13 +5,13 @@ import json
 
 
 
-def GenerateSID():
+def GenerateSID(key):
 
     page = requests.get("http://fritz.box/login_sid.lua")
     soup = BeautifulSoup(page.text, 'html.parser')
 
     challenge_value = soup.find('challenge').text
-    password = challenge_value + '-Gerike19'
+    password = challenge_value + '-' + key
 
     md5_value = hashlib.md5(password.encode('utf-16le')).hexdigest()
     page = requests.get("http://fritz.box/login_sid.lua?user=&response=" + challenge_value + "-" + md5_value)
@@ -54,6 +54,7 @@ def WlanConnections(lua):
     #print(soup.find('tbody', {'id': 'uiViewRow'}).prettify())
 
 def main():
+    
     sidvalue = GenerateSID()
     lua = GenerateLua(sidvalue)
     WlanConnections(lua)
