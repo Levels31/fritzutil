@@ -1,3 +1,5 @@
+#! /usr/local/bin/python3
+
 import requests
 from bs4 import BeautifulSoup
 import hashlib
@@ -7,14 +9,14 @@ import json
 
 def GenerateSID(key):
 
-    page = requests.get("http://fritz.box/login_sid.lua")
+    page = requests.get("http://192.168.178.1/login_sid.lua")
     soup = BeautifulSoup(page.text, 'html.parser')
 
     challenge_value = soup.find('challenge').text
     password = challenge_value + '-' + key
 
     md5_value = hashlib.md5(password.encode('utf-16le')).hexdigest()
-    page = requests.get("http://fritz.box/login_sid.lua?user=&response=" + challenge_value + "-" + md5_value)
+    page = requests.get("http://192.168.178.1/login_sid.lua?user=&response=" + challenge_value + "-" + md5_value)
     soup = BeautifulSoup(page.text, 'html.parser')
     sidvalue = soup.find('sid').text
 
@@ -22,16 +24,27 @@ def GenerateSID(key):
 
 def GenerateLua(sidvalue):
 
-    wlan_page = requests.get("http://fritz.box/?sid=" + sidvalue + "&lp=netDev")
+    wlan_page = requests.get("http://192.168.178.1/?sid=" + sidvalue + "&lp=netDev")
     wlan_soup = BeautifulSoup(wlan_page.text, 'html.parser')
 
     return ".lua?sid="+sidvalue
 
-def WlanConnections(lua):
+
+
+
+def WlanConnections(sid):
+    """ 
+        Receives a LUA-ID as input. Returns a list of all devices ever connected.
+
+        Parameters
+        ----------
+        sid : String
+            Session ID Number, needed for every request.
+    """
 
     list = []
 
-    wifiSettingsURL = "http://fritz.box/wlan/wlan_settings" + lua
+    wifiSettingsURL = "http://192.168.178.1/wlan/wlan_settings" + sid
     wifiPage = requests.get(wifiSettingsURL)
     soup = BeautifulSoup(wifiPage.text, 'html.parser')
 
@@ -55,7 +68,9 @@ def WlanConnections(lua):
 
 def main():
     
-    sidvalue = GenerateSID()
+    print("Please enter Passphrase for FritzBox Webinterface:")
+    key = input() 
+    sidvalue = GenerateSID(key)
     lua = GenerateLua(sidvalue)
     WlanConnections(lua)
 
