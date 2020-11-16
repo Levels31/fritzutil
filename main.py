@@ -3,7 +3,6 @@
 import requests
 from bs4 import BeautifulSoup
 import hashlib
-# import json
 
 
 def generate_sid(key):
@@ -15,7 +14,8 @@ def generate_sid(key):
     password = challenge_value + '-' + key
 
     md5_value = hashlib.md5(password.encode('utf-16le')).hexdigest()
-    page = requests.get("http://fritz.box/login_sid.lua?user=&response=" + challenge_value + "-" + md5_value)
+    page = requests.get("http://fritz.box/login_sid.lua?user=&response=" 
+        + challenge_value + "-" + md5_value)
     soup = BeautifulSoup(page.text, 'html.parser')
     sidvalue = soup.find('sid').text
 
@@ -24,8 +24,7 @@ def generate_sid(key):
 
 def generate_lua(sidvalue):
 
-    wlan_page = requests.get("http://fritz.box/?sid=" + sidvalue 
-    + "&lp=netDev")
+    wlan_page = requests.get("http://fritz.box/?sid=" + sidvalue + "&lp=netDev")
     wlan_soup = BeautifulSoup(wlan_page.text, 'html.parser')
 
     return ".lua?sid="+sidvalue
@@ -33,12 +32,12 @@ def generate_lua(sidvalue):
 
 def currently_active_devices(sid):
     """
-    Receives a LUA_ID as input. Returns a list of all devices that are 
+    Receives a LUA_ID as input. Returns a list of all devices that are
     currently connected to the network
     """
-    #url = "http://fritz.box/?sid=" + sid + "&lp=overview"
+
     page = requests.request(method="GET", url="http://fritz.box/?sid=" + sid + "&lp=overview")
-    print(page.text)
+
     soup = BeautifulSoup(page.text, 'html.parser')
     row = soup.findAll({'class': 'network list active no_column'})
 
@@ -48,7 +47,7 @@ def currently_active_devices(sid):
 
 def wlan_connected(sid):
     """ 
-        Receives a LUA-ID as input. Returns a list of all devices ever 
+        Receives a LUA-ID as input. Returns a list of all devices ever
         connected.
 
         Parameters
@@ -74,12 +73,11 @@ def main():
     key = input()
     sid = generate_sid(key)
     lua = generate_lua(sid)
-    #wlan_connected(lua)
-    currently_active_devices(sid)
+    wlan_connected(lua)
+    # currently_active_devices(sid)
 
     return 0
 
 
 if __name__ == "__main__":
     main()
-
